@@ -1,0 +1,83 @@
+`timescale 1ns / 1ps
+//////////////////////////////////////////////////////////////////////////////////
+// Company: 
+// Engineer: 
+// 
+// Create Date:    20:28:57 01/10/2023 
+// Design Name: 
+// Module Name:    mjolnir_adder 
+// Project Name: 
+// Target Devices: 
+// Tool versions: 
+// Description: 
+//
+// Dependencies: 
+//
+// Revision: 
+// Revision 0.01 - File Created
+// Additional Comments: 
+//
+//////////////////////////////////////////////////////////////////////////////////
+
+module mjolnir(input [31:0] a, input [31:0] b, output [31:0] sum, output carry);
+parameter N=32;
+	wire c0=0;
+	wire c1=1;
+	wire c2=0;
+	wire cout0;
+	wire cout1;
+	wire cout2;
+		wire [N/2-1:0] sum1;
+	wire [N/2-1:0] sum2;
+	bit_adder #(.N(N/2)) ba0(.a(a[N/2-1:0]), .b(b[N/2-1:0]), .cin(c0), .sum(sum[N/2-1:0]), .carry(cout0));
+	bit_adder #(.N(N/2)) ba1(.a(a[N-1:N/2]), .b(b[N-1:N/2]), .cin(c1), .sum(sum1), .carry(cout1));
+	bit_adder #(.N(N/2)) ba2(.a(a[N-1:N/2]), .b(b[N-1:N/2]), .cin(c2), .sum(sum2), .carry(cout2));
+	mux1 #(.N(N/2)) mx0(.a(sum1), .b(sum2), .in(cout0), .out(sum[N-1:N/2]));
+	mux2 #(.N(1)) mx1(.a(cout1), .b(cout2), .in(cout0), .out(carry));
+endmodule
+///////////////
+//mux
+///////////////
+module mux1(input [31:0] a, input [31:0] b, input in, output reg [31:0] out);
+parameter N=32;
+	always @* begin
+		if(in==1'b1) out=a;
+		else out=b;
+	end
+endmodule
+
+module mux2(input a, input b, input in, output reg out);
+parameter N=32;
+	always @* begin
+		if(in==1'b1) out=a;
+		else out=b;
+	end
+endmodule
+///////////
+//full adder
+////////////
+module full_adder(a, b, c, sum, carry);
+	input a, b, c;
+	output sum, carry;
+	wire x, y, z;
+	xor x1(x, a, b);
+	xor x2(sum, x, c);
+	and a1(y, a, b);
+	and a2(z, x, c);
+	or o1(carry, y, z);
+endmodule
+///////////
+//bit adder
+///////////
+
+module bit_adder(input [15:0] a, input [15:0] b, input cin, output [15:0] sum, output carry);
+parameter N=32;
+	wire [N:0] c;
+	assign c[0]=cin;
+	genvar i;
+		generate for(i=0 ; i<N ; i=i+1) begin : adder
+			full_adder fa(.a(a[i]), .b(b[i]), .c(c[i]), .sum(sum[i]), .carry(c[i+1]));
+		end
+		endgenerate
+	assign carry=c[N];
+endmodule

@@ -1,0 +1,44 @@
+`timescale 1ns / 1ps
+
+////////////////////////////////////////////////////////////////////////////////
+// Company: 
+// Engineer:
+//
+// Create Date:   20:40:07 01/10/2023
+// Design Name:   mjolnir
+// Module Name:   /home/ise/mjolnir_adder/mjolnir_tb.v
+// Project Name:  mjolnir_adder
+// Target Device:  
+// Tool versions:  
+// Description: 
+//
+// Verilog Test Fixture created by ISE for module: mjolnir
+//
+// Dependencies:
+// 
+// Revision:
+// Revision 0.01 - File Created
+// Additional Comments:
+// 
+////////////////////////////////////////////////////////////////////////////////
+
+module mjolnir_tb;
+parameter N=32;
+	reg [N-1:0] a;
+	reg [N-1:0] b;
+	wire [N-1:0] sum;
+	wire carry;
+	integer j;
+	mjolnir mjnr(.a(a), .b(b), .sum(sum), .carry(carry));
+	initial begin
+		$dumpfile("mjolnir_tb_tg.vcd");
+		$dumpvars(0, mjolnir_tb);
+	end
+	initial begin
+		for( j=0 ; j<1 ; j=j+1) begin
+			a<=$random;
+			b<=$random;
+			#10;
+		end
+	end
+endmodule
